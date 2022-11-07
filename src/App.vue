@@ -15,11 +15,7 @@ export default {
   name: 'App',
   data() {
     return {
-      todoList: [
-        {id: '001', todo: '吃饭', done: true},
-        {id: '002', todo: '睡觉', done: false},
-        {id: '003', todo: '打豆豆', done: true},
-      ]
+      todoList: JSON.parse(localStorage.getItem('todoList')) || []
     }
   },
   components:{
@@ -29,7 +25,15 @@ export default {
   },
   methods:{
     addTodoList(value) {
-      this.todoList.unshift(value)
+      this.todoList.forEach(item => {
+        if (item.todo === value.todo) {
+          alert('该任务已存在,请修改任务')
+          throw ''
+        }
+      })
+      try {
+        this.todoList.unshift(value)
+      } catch (err){}
     },
 
     changeDone(value) {
@@ -50,8 +54,26 @@ export default {
 
     cleanDone() {
       this.todoList = this.todoList.filter(item => item.done === false)
+    },
+
+    editItem(value) {
+      this.todoList.forEach(item => {
+        item.todo === value ? item.isEdit = !item.isEdit : ''
+      })
     }
+  },
+  watch: {
+    todoList: {
+      handler(newValue) {
+        localStorage.setItem('todoList', JSON.stringify(newValue))
+      },
+      deep: true
+    }
+  },
+  mounted() {
+    this.$bus.$on('getEdit', this.editItem)
   }
+
 }
 </script>
 
